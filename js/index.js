@@ -1,46 +1,4 @@
-
-var idea = [
-    {
-        "unique_id": 0,
-        "idea_owner": "SKSKSKS",
-        "title": "Upside down purse",
-        "desc": "Purse for ppl with no munney",
-        "number_of_backers": 69,
-        "time_of_deadline": "12/12/12",
-        "funding_raised": 15080,
-        "goal": 22550
-    },
-    {
-        "unique_id": 1,
-        "idea_owner": "SKSKSKS",
-        "title": "Upside down purse",
-        "desc": "Purse for ppl with no munney",
-        "number_of_backers": 69,
-        "time_of_deadline": "12/12/12",
-        "funding_raised": 15080,
-        "funding_req": 22550
-    },
-    {
-        "unique_id": 2,
-        "idea_owner": "SKSKSKS",
-        "title": "Upside down purse",
-        "desc": "Purse for ppl with no munney",
-        "number_of_backers": 69,
-        "time_of_deadline": "12/12/12",
-        "funding_raised": 15080,
-        "funding_req": 22550
-    },
-];
-
-var web3;
-var account_addr, account_bal;
-if (typeof web3 !== 'undefined')
-    web3 = new Web3(web3.currentProvider);
-
-console.log(web3);
-
-var address = "0xb7A247291d402Da8AB3AD0Fc2096Ee0614299C38";
-var abi = [
+const abi = [
 	{
 		"anonymous": false,
 		"inputs": [
@@ -190,6 +148,11 @@ var abi = [
 				"type": "string"
 			},
 			{
+				"internalType": "string",
+				"name": "owner_name",
+				"type": "string"
+			},
+			{
 				"internalType": "uint256",
 				"name": "unique_id",
 				"type": "uint256"
@@ -215,6 +178,11 @@ var abi = [
 				"type": "uint256"
 			},
 			{
+				"internalType": "uint256",
+				"name": "number_of_backers",
+				"type": "uint256"
+			},
+			{
 				"internalType": "address",
 				"name": "idea_owner",
 				"type": "address"
@@ -233,6 +201,11 @@ var abi = [
 			{
 				"internalType": "string",
 				"name": "desc",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "owner_name",
 				"type": "string"
 			},
 			{
@@ -332,6 +305,11 @@ var abi = [
 						"type": "string"
 					},
 					{
+						"internalType": "string",
+						"name": "owner_name",
+						"type": "string"
+					},
+					{
 						"internalType": "uint256",
 						"name": "unique_id",
 						"type": "uint256"
@@ -354,6 +332,11 @@ var abi = [
 					{
 						"internalType": "uint256",
 						"name": "time_of_deadline",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "number_of_backers",
 						"type": "uint256"
 					},
 					{
@@ -397,10 +380,54 @@ var abi = [
 		"type": "function"
 	}
 ];
+
+var idea = [
+    {
+        "unique_id": 0,
+        "owner_name": "SKSKSKS",
+        "title": "Upside down purse",
+        "desc": "Purse for ppl with no munney",
+        "number_of_backers": 69,
+        "time_of_deadline": "12/12/12",
+        "funding_raised": 15080,
+        "goal": 22550
+    },
+    {
+        "unique_id": 1,
+        "owner_name": "SKSKSKS",
+        "title": "Upside down purse",
+        "desc": "Purse for ppl with no munney",
+        "number_of_backers": 69,
+        "time_of_deadline": "12/12/12",
+        "funding_raised": 15080,
+        "funding_req": 22550
+    },
+    {
+        "unique_id": 2,
+        "idea_owner": "SKSKSKS",
+        "title": "Upside down purse",
+        "desc": "Purse for ppl with no munney",
+        "number_of_backers": 69,
+        "time_of_deadline": "12/12/12",
+        "funding_raised": 15080,
+        "funding_req": 22550
+    },
+];
+
+var web3;
+var account_addr, account_bal;
+if (typeof web3 !== 'undefined')
+    web3 = new Web3(web3.currentProvider);
+
+console.log(abi);
+
+var address = "0xC0bB6Bc90D94c1ee613a0cda75117cDfF9eE9f77";
+
 var contract = new web3.eth.Contract(abi, address);
 
 var i = {
     'title': "Test Project",
+	'owner_name': "Test Owner",
     'desc': "Description goes here",
     'funding_req': 100,
     'days_to_deadline': 5
@@ -427,16 +454,16 @@ function unixToDate(unix_timestamp) {
     // multiplied by 1000 so that the argument is in milliseconds, not seconds.
     var date = new Date(unix_timestamp * 1000);
     // Hours part from the timestamp
-    var hours = date.getHours();
-    // Minutes part from the timestamp
-    var minutes = "0" + date.getMinutes();
-    // Seconds part from the timestamp
-    var seconds = "0" + date.getSeconds();
+    return date.getUTCDate().toString() + '/' + date.getUTCMonth().toString()+1 + '/' + date.getFullYear().toString();
+}
 
-    // Will display time in 10:30:23 format
-    var formattedTime = hours + ':' + minutes.substr(-2) + ':' + seconds.substr(-2);
+// return the difference between two dates in days
+function dateDiffInDays(a, b) {
+	// Discard the time and time-zone information.
+	var utc1 = Date.UTC(a.getFullYear(), a.getMonth(), a.getDate());
+	var utc2 = Date.UTC(b.getFullYear(), a.getMonth(), a.getDate());
 
-    return date.getDay().toString() + '/' + date.getMonth().toString() + '/' + date.getFullYear().toString();
+	return Math.floor((utc2 - utc1) / 1);
 }
 
 function createCard(idea) {
@@ -455,13 +482,13 @@ function createCard(idea) {
         <p>${idea.desc}</p>
 
         <div>
-            <h5>Project Owner: <span>${idea.idea_owner}</span></h5>
+            <h5>Project Owner: <span>${idea.owner_name}</span></h5>
         </div>
 
         <div class="row">
 
             <div class="col">
-            <h5>No. of Backers: <span>-</span></h5>
+            <h5>No. of Backers: <span>${idea.number_of_backers}</span></h5>
             </div>
 
             <div class="col">
@@ -478,7 +505,7 @@ function createCard(idea) {
             <div class="progress-bar progress-bar-striped bg-success" role="progressbar" style="width: ${percentRaised}%" aria-valuenow="${percentRaised}" aria-valuemin="0" aria-valuemax="100"><span style="font-size: medium;font-weight: bolder;">${percentRaised}%</span></div>
         </div>
 
-        <div style="margin: auto;text-align: right;">Goal: ₹<span>${idea.funding_req}</span></div>
+        <div style="margin: auto;text-align: right;">Goal: <span>${idea.funding_req}</span> ETH WEI</div>
         </div>
 
     </div>
@@ -488,6 +515,7 @@ function createCard(idea) {
 function buildFeed(ideas) {
 
     const ideaContainer = document.getElementById('ideaContainer');
+	ideaContainer.innerHTML = '';
 
     ideas.forEach((idea) => {
 
@@ -507,24 +535,35 @@ function createIdea(idea) {
         console.log(account_addr);
         // $("#account").text(account_addr);
     }).then(function() {
-        contract.methods.list_new_idea(idea.title, idea.desc, idea.funding_req, idea.days_to_deadline).send({from:account_addr}).then(function(result) {
+        contract.methods.list_new_idea(idea.title, idea.desc, idea.owner_name, idea.funding_req, idea.days_to_deadline).send({from:account_addr}).then(function(result) {
             console.log(result);
+			viewAllIdeas();
         });
     });
 }
 
 function viewAllIdeas() {
-    web3.eth.getAccounts().then(function(accounts) {
+
+	contract.methods.view_all_ideas().call().then(function(result) {
+		console.log(result);
+		buildFeed(result);
+    });
+}
+
+donateIdea(1, 500);
+
+function donateIdea(idea_id, amount) {
+
+	web3.eth.getAccounts().then(function(accounts) {
         console.log(accounts);
         account_addr = accounts[0];
         console.log(account_addr);
-        // $("#account").text(account_addr);
-    }).then(function() {
-        contract.methods.view_all_ideas().call({from:account_addr}).then(function(result) {
-            console.log(result);
-            buildFeed(result);
-        });
+		contract.methods.donate_to_idea(idea_id, amount).send({from:account_addr, value:amount})
+		.then(function(result) {
+			console.log(result);
+		});
     });
+
 }
 
 function viewContBalance() {
