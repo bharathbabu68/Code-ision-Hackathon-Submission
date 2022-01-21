@@ -449,6 +449,24 @@ viewAllIdeas();
 // HTML Integration
 ////////////////////////////////////////
 
+function createIdeaModal() {
+
+	$('#createIdeaModal').modal('show');
+}
+
+function submitIdea() {
+
+	const ownerName = $('#ownerName').value();
+	const title = $('#title').value();
+	const desc = $('#desc').value();
+	const fundingReq = $('#fundingReq').value();
+	const expiration = $('#expiration').value();
+	const projectLink = $('#projectLink').value();
+
+	
+
+}
+
 function unixToDate(unix_timestamp) {
     // Create a new JavaScript Date object based on the timestamp
     // multiplied by 1000 so that the argument is in milliseconds, not seconds.
@@ -456,32 +474,26 @@ function unixToDate(unix_timestamp) {
     return date.getUTCDate().toString() + '/' + date.getUTCMonth().toString()+1 + '/' + date.getFullYear().toString();
 }
 
-// return the difference between two dates in days
-function dateDiffInDays(a, b) {
-	// Discard the time and time-zone information.
-	var utc1 = Date.UTC(a.getFullYear(), a.getMonth(), a.getDate());
-	var utc2 = Date.UTC(b.getFullYear(), a.getMonth(), a.getDate());
+function openFundModal(idea_id) {
 
-	return Math.floor((utc2 - utc1) / 1);
+	document.getElementById(idea_id.toString()).value = "";
+	$(`#Modal${idea_id}`).modal('show');
 }
 
 function createCard(idea) {
 
     const percentRaised = Math.round(idea.funding_raised / idea.funding_req * 100,2);
 	const currDate = Math.floor(Date.now()/1000);
-	console.log(currDate,parseInt(idea.time_of_deadline));
 	const buttonStr = currDate >= parseInt(idea.time_of_deadline) ? '' 
 		: `
-		<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+		<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#Modal${idea.unique_id}">
 			Fund this Project
 		</button>`;
-
-	console.log(idea.unique_id);
 
     return `
     <div class="card card-idea m-3 shadow">
 
-        <img src="https://blog.producthype.co/wp-content/uploads/2020/03/Best-Kickstarter-Projects-2020-4.jpg" style="height: 100%;width: 100%;">
+        <img src="https://blog.producthype.co/wp-content/uploads/2020/03/Best-Kickstarter-Projects-2020-4.jpg" style="height: 100%;width: 100%;object-fit: cover; object-position: center;">
 
         <div class="card-idea-desc">
 
@@ -519,15 +531,15 @@ function createCard(idea) {
 
     </div>
 
-	<div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+	<div class="modal fade" id="Modal${idea.unique_id}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="Modal${idea.unique_id}Label" aria-hidden="true">
 		<div class="modal-dialog">
 			<div class="modal-content">
 			<div class="modal-header">
-				<h5 class="modal-title" id="staticBackdropLabel">${idea.title}</h5>
+				<h5 class="modal-title" id="Modal${idea.unique_id}Label">${idea.title}</h5>
 				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 			</div>
 			<div class="modal-body">
-				<input type="number" placeholder="Enter amount to fund:" id="${idea.unique_id}">
+				<input min="0" type="number" value="" placeholder="Enter amount to fund:" id="${idea.unique_id}">
 			</div>
 			<div class="modal-footer">
 				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -553,6 +565,24 @@ function buildFeed(ideas) {
 ////////////////////////////////////////////
 // Smart Contracts
 ///////////////////////////////////////////
+
+function copyAddress() {
+
+	navigator.clipboard.writeText(account_addr);
+}
+ 
+function initialiseAddress() {
+
+	web3.eth.getAccounts().then((accounts) => {
+
+		account_addr = accounts[0];
+		const len = account_addr.length;
+		const croppedAddress = account_addr.substring(0,6) + "..." + account_addr.substring(len-4, len);
+		document.getElementById('userAddress').innerHTML = croppedAddress;
+	});
+}
+
+initialiseAddress();
 
 function createIdea(idea) {
     
@@ -583,9 +613,9 @@ function donateIdea(idea_id) {
 
 	const amount = parseInt(document.getElementById(idea_id.toString()).value);
 
-	console.log(idea_id);
+	console.log(idea_id, amount);
 
-	// console.log(amount);
+	$(`#Modal${idea_id}`).modal('hide');
 
 	web3.eth.getAccounts().then(function(accounts) {
         console.log(accounts);
@@ -594,6 +624,8 @@ function donateIdea(idea_id) {
 		contract.methods.donate_to_idea(idea_id, amount).send({from:account_addr, value:amount})
 		.then(function(result) {
 			console.log(result);
+			$('#successModal').modal('show');
+			viewAllIdeas();
 		});
     });
 }
@@ -614,24 +646,6 @@ function viewContBalance() {
         });
     });
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 //////////////////////////////////////////////////
