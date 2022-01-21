@@ -153,6 +153,11 @@ const abi = [
 				"type": "string"
 			},
 			{
+				"internalType": "string",
+				"name": "links",
+				"type": "string"
+			},
+			{
 				"internalType": "uint256",
 				"name": "unique_id",
 				"type": "uint256"
@@ -206,6 +211,11 @@ const abi = [
 			{
 				"internalType": "string",
 				"name": "owner_name",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "links",
 				"type": "string"
 			},
 			{
@@ -307,6 +317,11 @@ const abi = [
 					{
 						"internalType": "string",
 						"name": "owner_name",
+						"type": "string"
+					},
+					{
+						"internalType": "string",
+						"name": "links",
 						"type": "string"
 					},
 					{
@@ -421,7 +436,7 @@ if (typeof web3 !== 'undefined')
 
 console.log(abi);
 
-var address = "0xC0bB6Bc90D94c1ee613a0cda75117cDfF9eE9f77";
+var address = "0x34cc708ba94a76F207A2B5B9950dFd693C6C4864";
 
 var contract = new web3.eth.Contract(abi, address);
 
@@ -456,15 +471,41 @@ function createIdeaModal() {
 
 function submitIdea() {
 
-	const ownerName = $('#ownerName').value();
-	const title = $('#title').value();
-	const desc = $('#desc').value();
-	const fundingReq = $('#fundingReq').value();
-	const expiration = $('#expiration').value();
-	const projectLink = $('#projectLink').value();
+	const ownerName = $('#ownerName').val();
+	const title = $('#title').val();
+	const desc = $('#desc').val();
+	const fundingReq = $('#fundingReq').val();
+	const expiration = $('#expiration').val();
+	const projectLink = $('#projectLink').val();
+	const imageLink = $('#imageLink').val();
 
-	
+	//validate later
 
+	//find number of days between today and expiration
+	var day2 = new Date(expiration);
+	var day1 = new Date();
+
+	var difference = Math.abs(day2.getTime()-day1.getTime());
+
+	difference = Math.ceil(difference/86400000);
+
+	console.log(difference);
+
+
+	const total_link = imageLink + ','  + projectLink;
+
+	var idea = {
+		'owner_name': ownerName,
+		'title': title,
+		'desc': desc,
+		'funding_req': fundingReq,
+		'days_to_deadline': difference,
+		'links': total_link
+	}
+
+	// console.log(expiration);
+
+	createIdea(idea);
 }
 
 function unixToDate(unix_timestamp) {
@@ -592,7 +633,7 @@ function createIdea(idea) {
         console.log(account_addr);
         // $("#account").text(account_addr);
     }).then(function() {
-        contract.methods.list_new_idea(idea.title, idea.desc, idea.owner_name, idea.funding_req, idea.days_to_deadline).send({from:account_addr}).then(function(result) {
+        contract.methods.list_new_idea(idea.title, idea.desc, idea.owner_name, idea.links, idea.funding_req, idea.days_to_deadline).send({from:account_addr}).then(function(result) {
             console.log(result);
 			viewAllIdeas();
         });

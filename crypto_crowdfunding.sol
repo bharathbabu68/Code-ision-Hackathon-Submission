@@ -14,6 +14,7 @@ contract CrowdFunding{
         string title;
         string desc;
         string owner_name;
+        string links;
         uint256 unique_id;
         uint256 funding_req;
         uint256 time_of_creation;
@@ -36,10 +37,11 @@ contract CrowdFunding{
 
     idea[] public ideas;
 
-    function list_new_idea(string memory title, string memory desc, string memory owner_name, uint256 funding_req, uint days_to_deadline) public returns(uint256){
+    function list_new_idea(string memory title, string memory desc, string memory owner_name, string memory links, uint256 funding_req, uint days_to_deadline) public returns(uint256){
         require(days_to_deadline > 0);
         require(funding_req > 0);
-        ideas.push(idea(true, title, desc,owner_name, id_counter,funding_req, block.timestamp, 0, uint256(block.timestamp + days_to_deadline *1 minutes),0, msg.sender));
+        
+        ideas.push(idea(true, title, desc,owner_name, links,id_counter,funding_req, block.timestamp, 0, uint256(block.timestamp + days_to_deadline *1 minutes),0, msg.sender));
         id_counter++;
         emit listed_idea(id_counter-1);
         return id_counter-1;
