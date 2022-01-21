@@ -453,7 +453,6 @@ function unixToDate(unix_timestamp) {
     // Create a new JavaScript Date object based on the timestamp
     // multiplied by 1000 so that the argument is in milliseconds, not seconds.
     var date = new Date(unix_timestamp * 1000);
-    // Hours part from the timestamp
     return date.getUTCDate().toString() + '/' + date.getUTCMonth().toString()+1 + '/' + date.getFullYear().toString();
 }
 
@@ -468,7 +467,16 @@ function dateDiffInDays(a, b) {
 
 function createCard(idea) {
 
-    const percentRaised = idea.funding_raised / idea.funding_req * 100;
+    const percentRaised = Math.round(idea.funding_raised / idea.funding_req * 100,2);
+	const currDate = Math.floor(Date.now()/1000);
+	console.log(currDate,parseInt(idea.time_of_deadline));
+	const buttonStr = currDate >= parseInt(idea.time_of_deadline) ? '' 
+		: `
+		<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+			Fund this Project
+		</button>`;
+
+	console.log(idea.unique_id);
 
     return `
     <div class="card card-idea m-3 shadow">
@@ -479,7 +487,7 @@ function createCard(idea) {
 
         <h3>${idea.title}</h3>
 
-        <p>${idea.desc}</p>
+        <div style="height: 100px; width: 100%;">${idea.desc}</div>
 
         <div>
             <h5>Project Owner: <span>${idea.owner_name}</span></h5>
@@ -499,16 +507,35 @@ function createCard(idea) {
 
         <hr>
 
-        <h5>Funding Raised:</h4>
+        <h5>Funding Raised: ${idea.funding_raised} ETH</h4>
 
         <div class="progress">
             <div class="progress-bar progress-bar-striped bg-success" role="progressbar" style="width: ${percentRaised}%" aria-valuenow="${percentRaised}" aria-valuemin="0" aria-valuemax="100"><span style="font-size: medium;font-weight: bolder;">${percentRaised}%</span></div>
         </div>
 
-        <div style="margin: auto;text-align: right;">Goal: <span>${idea.funding_req}</span> ETH WEI</div>
+        <div style="margin: auto;text-align: right;">Goal: <span>${idea.funding_req}</span> ETH</div>
+		<div>${buttonStr}</div>
         </div>
 
     </div>
+
+	<div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="staticBackdropLabel">${idea.title}</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				<input type="number" placeholder="Enter amount to fund:" id="${idea.unique_id}">
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+				<button type="button" class="btn btn-primary" onclick="donateIdea(${idea.unique_id})">Fund</button>
+			</div>
+			</div>
+		</div>
+	</div>
     `;
 }
 
@@ -550,20 +577,25 @@ function viewAllIdeas() {
     });
 }
 
-donateIdea(1, 500);
+// donateIdea(1, 500);
 
-function donateIdea(idea_id, amount) {
+function donateIdea(idea_id) {
+
+	const amount = parseInt(document.getElementById(idea_id.toString()).value);
+
+	console.log(idea_id);
+
+	// console.log(amount);
 
 	web3.eth.getAccounts().then(function(accounts) {
         console.log(accounts);
         account_addr = accounts[0];
-        console.log(account_addr);
+        console.log(amount, account_addr);
 		contract.methods.donate_to_idea(idea_id, amount).send({from:account_addr, value:amount})
 		.then(function(result) {
 			console.log(result);
 		});
     });
-
 }
 
 function viewContBalance() {

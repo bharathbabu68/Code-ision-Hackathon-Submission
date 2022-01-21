@@ -13,11 +13,13 @@ contract CrowdFunding{
         bool is_active; 
         string title;
         string desc;
+        string owner_name;
         uint256 unique_id;
         uint256 funding_req;
         uint256 time_of_creation;
         uint256 funding_raised;
         uint256 time_of_deadline;
+        uint256 number_of_backers;
         address idea_owner;
     }
 
@@ -34,10 +36,10 @@ contract CrowdFunding{
 
     idea[] public ideas;
 
-    function list_new_idea(string memory title, string memory desc, uint256 funding_req, uint days_to_deadline) public returns(uint256){
+    function list_new_idea(string memory title, string memory desc, string memory owner_name, uint256 funding_req, uint days_to_deadline) public returns(uint256){
         require(days_to_deadline > 0);
         require(funding_req > 0);
-        ideas.push(idea(true, title, desc, id_counter,funding_req, block.timestamp, 0, uint256(block.timestamp + days_to_deadline *1 minutes), msg.sender));
+        ideas.push(idea(true, title, desc,owner_name, id_counter,funding_req, block.timestamp, 0, uint256(block.timestamp + days_to_deadline *1 minutes),0, msg.sender));
         id_counter++;
         emit listed_idea(id_counter-1);
         return id_counter-1;
@@ -68,8 +70,10 @@ contract CrowdFunding{
                 break;
             }
         }
-        if(flag==0)
+        if(flag==0){
             mydonor.push(donor(msg.sender, amt, false));
+            ideas[idea_id].number_of_backers++;
+        }
         return project_donators[idea_id];
     }
 
@@ -135,7 +139,5 @@ contract CrowdFunding{
             mydonor[idx].is_refunded=true;
         }
     }
-
-
 
 }
