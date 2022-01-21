@@ -395,13 +395,12 @@ const abi = [
 		"type": "function"
 	}
 ];
+var address = "0x34cc708ba94a76F207A2B5B9950dFd693C6C4864";
 
 var web3;
 var account_addr, account_bal, currentFilter = "active";
 if (typeof web3 !== 'undefined')
     web3 = new Web3(web3.currentProvider);
-
-var address = "0x34cc708ba94a76F207A2B5B9950dFd693C6C4864";
 
 var contract = new web3.eth.Contract(abi, address);
 
@@ -412,30 +411,16 @@ if(window.ethereum) {
 }
 
 initialiseAddress();
-
 viewAllIdeas('active');
 
-/////////////////////////////////////////
-// HTML Integration
-////////////////////////////////////////
-
 function setFilter(filter, display) {
-
 	if(filter === currentFilter) return;
-
 	currentFilter = filter;
-
 	$('#chooseFilter').text(display);
-
 	viewAllIdeas(filter);
 }
 
-///////////////////////
-// Modal Sheets
-//////////////////////
-
 function createIdeaModal() {
-
 	//Clear form
 	$('#ownerName').val('');
 	$('#title').val('');
@@ -444,7 +429,6 @@ function createIdeaModal() {
 	$('#expiration').val('');
 	$('#projectLink').val('');
 	$('#imageLink').val('');
-
 	$('#createIdeaModal').modal('show');
 }
 
@@ -545,15 +529,15 @@ function createCard(idea) {
 	const projectLink = idea.links.split(',')[1];
 
     return `
-    <div class="card card-idea m-3 shadow">
+    <div class="card card-idea m-3 shadow" style="background-color:black">
 
-        <img src="https://blog.producthype.co/wp-content/uploads/2020/03/Best-Kickstarter-Projects-2020-4.jpg" style="height: 100%;width: 100%;object-fit: cover; object-position: center;">
+         <img src="https://blog.producthype.co/wp-content/uploads/2020/03/Best-Kickstarter-Projects-2020-4.jpg" style="height: 100%;width: 100%;object-fit: cover; object-position: center;">
 
         <div class="card-idea-desc">
 
         <h3>${idea.title}</h3>
 
-        <div style="height: 100px; width: 100%;">${idea.desc}</div>
+        <div style="height: 50px; width: 100%;">${idea.desc}</div>
 
         <div>
             <h5>Project Owner: <span>${idea.owner_name}</span></h5>
@@ -649,10 +633,6 @@ function buildFeed(ideas, filter) {
 	}
     
 }
-
-////////////////////////////////////////////
-// Smart Contracts
-///////////////////////////////////////////
 
 function copyAddress() {
 
@@ -765,117 +745,6 @@ function viewContBalance() {
 
 
 function unixToDate(unix_timestamp) {
-    // Create a new JavaScript Date object based on the timestamp
-    // multiplied by 1000 so that the argument is in milliseconds, not seconds.
     var date = new Date(unix_timestamp * 1000);
     return date.getUTCDate().toString() + '/' + date.getUTCMonth().toString()+1 + '/' + date.getFullYear().toString();
 }
-
-
-//////////////////////////////////////////////////
-// WEB3
-//////////////////////////////////////////////////
-
-// var web3;
-//         var account_addr, account_bal;
-//         if (typeof web3 !== 'undefined')
-//             web3 = new Web3(web3.currentProvider);
-//             var address = "0x8fc7800911Ab791BA1717687808a4d966233b58E";
-//         var abi = [
-// 	{
-// 		"inputs": [],
-// 		"name": "retrieve",
-// 		"outputs": [
-// 			{
-// 				"internalType": "uint256",
-// 				"name": "",
-// 				"type": "uint256"
-// 			}
-// 		],
-// 		"stateMutability": "view",
-// 		"type": "function"
-// 	},
-// 	{
-// 		"inputs": [
-// 			{
-// 				"internalType": "uint256",
-// 				"name": "num",
-// 				"type": "uint256"
-// 			}
-// 		],
-// 		"name": "store",
-// 		"outputs": [],
-// 		"stateMutability": "nonpayable",
-// 		"type": "function"
-// 	}
-// ];
-//         var contract = new web3.eth.Contract(abi, address);
-//         web3.eth.getAccounts().then(function(accounts) {
-//             console.log(accounts);
-//             account_addr = accounts[0];
-//             console.log(account_addr);
-//             $("#account").text(account_addr);
-//         }) .then(function() {
-//             web3.eth.getBalance(account_addr).then(function(balance) {
-//                 account_bal = balance;
-//                 console.log(web3.utils.fromWei(balance, 'ether'));
-//                 $("#act-bal").text(web3.utils.fromWei(balance, 'ether'));
-//             }).then(function() {
-//                 contract.methods.retrieve().call({from:account_addr}).then(function(result) {
-//                     // console.log(result);
-//                     $("#balance").html(result);
-//                 });
-//             });
-//         });
-
-//         if(window.ethereum) {
-//             window.ethereum.on('accountsChanged', function () {
-//                 var curr_acc;
-//                 web3.eth.getAccounts(function(error, accounts) {
-//                     account_addr = accounts[0];
-//                     document.getElementById('account').innerHTML = accounts;
-//                     curr_acc = accounts[0];
-//                 }).then(function() {
-//                     web3.eth.getBalance(curr_acc).then(function(balance) {
-//                         document.getElementById('act-bal').innerHTML = web3.utils.fromWei(balance, 'ether');
-//                     })
-//                 }).then(function() {
-//                     contract.methods.retrieve().call({from:curr_acc}).then(function(result) {
-//                         document.getElementById('balance').innerHTML = result;
-//                     })
-//                 })
-//             });
-//         }
-
-        
-
-//         document.getElementById("myBtn").addEventListener("click", function() {
-//             contract.methods.retrieve().call({from: account_addr}).then(function (result) {
-//                 $('#balance').html(result);
-//             }).then(function(tx) {
-//                 console.log(tx);
-//             });
-//         })
-
-//         document.getElementById("store").addEventListener("click", function() {
-//             var num = parseInt(document.getElementById("input").value);
-//             console.log(num);
-//             web3.eth.getAccounts().then(function(accounts){
-//                 var acc = accounts[0];
-//                 return contract.methods.store(num).send({from: acc});
-//             }).then(function(tx){
-//                 console.log(tx);
-//                 alert("Transaction successful");
-//                 document.getElementById("input").value = "";
-//                 contract.methods.retrieve().call({from: account_addr}).then(function (result) {
-//                 $('#balance').html(result);
-//             }).then(function() {
-//                 web3.eth.getBalance(account_addr).then(function(balance) {
-//                         document.getElementById('act-bal').innerHTML = web3.utils.fromWei(balance, 'ether');
-//                     })
-//             });
-//             }).catch( function(tx){
-//                 console.log(tx);
-//             })
-
-//         })

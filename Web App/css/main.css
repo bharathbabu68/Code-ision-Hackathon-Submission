@@ -33,7 +33,7 @@ a, .nav-link{
 .user-address {
     text-align: end; 
     color: white; 
-    font-size: small;
+    font-size: medium;
     border: 1px solid white;
     padding: 5px;
     border-radius: 6px;
