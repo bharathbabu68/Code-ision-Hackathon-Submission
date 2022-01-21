@@ -472,11 +472,7 @@ function submitIdea() {
 	const projectLink = $('#projectLink').val();
 	const imageLink = $('#imageLink').val();
 
-<<<<<<< Updated upstream
 	//validate later
-=======
-	//validate ownerName
->>>>>>> Stashed changes
 	if (ownerName == '') {
 		alert('Please enter a valid owner name');
 		return;
