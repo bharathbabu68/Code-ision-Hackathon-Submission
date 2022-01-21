@@ -1,0 +1,31 @@
+
+body {
+    background-color: rgb(142, 146, 168);
+}
+
+a, .nav-link{
+    color: white;
+}
+
+.card-idea{
+    margin: auto;
+    position: relative;
+    height: 425px;
+    margin: 5px;
+    background-color: #eeedfc;
+    overflow: hidden;
+    border: none;
+    border-radius: 10px;
+}
+
+.card-idea-desc{
+    background-color: white;
+    width: 40%;
+    height: 90%;
+    position: absolute;
+    opacity: 0.8;
+    border-radius: 10px;
+    margin: 20px;
+    right: 0px;
+    padding: 10px;
+}
