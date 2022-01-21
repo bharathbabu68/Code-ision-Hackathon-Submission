@@ -399,8 +399,12 @@ var address = "0x34cc708ba94a76F207A2B5B9950dFd693C6C4864";
 
 var web3;
 var account_addr, account_bal, currentFilter = "active";
-if (typeof web3 !== 'undefined')
+if (typeof web3 != 'undefined'){
     web3 = new Web3(web3.currentProvider);
+}
+else{
+	alert("Please install MetaMask and refresh the page");
+}
 
 var contract = new web3.eth.Contract(abi, address);
 
@@ -412,6 +416,21 @@ if(window.ethereum) {
 
 initialiseAddress();
 viewAllIdeas('active');
+
+function connect() {
+
+	ethereum
+	.request({ method: 'eth_requestAccounts' })
+	.then(initialiseAddress())
+	.catch((err) => {
+	if (err.code === 4001) {
+		console.log('Please connect to MetaMask.');
+		$('#status').html('You refused to connect Metamask')
+	} else {
+		console.error(err);
+	}
+	});
+}
 
 function setFilter(filter, display) {
 	if(filter === currentFilter) return;
@@ -636,6 +655,10 @@ function buildFeed(ideas, filter) {
 
 function copyAddress() {
 
+	if(!account_addr) {
+		connect();
+	}
+
 	navigator.clipboard.writeText(account_addr);
 
 	$('#userAddress').text('Copied Address!');
@@ -648,6 +671,13 @@ function initialiseAddress() {
 	web3.eth.getAccounts().then((accounts) => {
 
 		account_addr = accounts[0];
+
+		if(!account_addr) {
+			
+			$('#userAddress').text('Connect Metamask');
+			$('#userBalance').text('');
+			return;
+		}
 
 		const len = account_addr.length;
 		const croppedAddress = account_addr.substring(0,6) + "..." + account_addr.substring(len-4, len);
