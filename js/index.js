@@ -396,77 +396,70 @@ const abi = [
 	}
 ];
 
-var idea = [
-    {
-        "unique_id": 0,
-        "owner_name": "SKSKSKS",
-        "title": "Upside down purse",
-        "desc": "Purse for ppl with no munney",
-        "number_of_backers": 69,
-        "time_of_deadline": "12/12/12",
-        "funding_raised": 15080,
-        "goal": 22550
-    },
-    {
-        "unique_id": 1,
-        "owner_name": "SKSKSKS",
-        "title": "Upside down purse",
-        "desc": "Purse for ppl with no munney",
-        "number_of_backers": 69,
-        "time_of_deadline": "12/12/12",
-        "funding_raised": 15080,
-        "funding_req": 22550
-    },
-    {
-        "unique_id": 2,
-        "idea_owner": "SKSKSKS",
-        "title": "Upside down purse",
-        "desc": "Purse for ppl with no munney",
-        "number_of_backers": 69,
-        "time_of_deadline": "12/12/12",
-        "funding_raised": 15080,
-        "funding_req": 22550
-    },
-];
-
 var web3;
-var account_addr, account_bal;
+var account_addr, account_bal, currentFilter = "active";
 if (typeof web3 !== 'undefined')
     web3 = new Web3(web3.currentProvider);
-
-console.log(abi);
 
 var address = "0x34cc708ba94a76F207A2B5B9950dFd693C6C4864";
 
 var contract = new web3.eth.Contract(abi, address);
 
-var i = {
-    'title': "Test Project",
-	'owner_name': "Test Owner",
-    'desc': "Description goes here",
-    'funding_req': 100,
-    'days_to_deadline': 5
+if(window.ethereum) {
+	window.ethereum.on('accountsChanged', () => {
+		initialiseAddress();
+	});
 }
 
-viewAllIdeas();
-// createIdea(i);
+initialiseAddress();
 
-// web3.eth.getAccounts().then(function(accounts) {
-//     console.log(accounts[0]);
-//     account_addr = accounts[0];
-// }) .then(function() {
-//     contract.methods.list_new_idea('title', 'desc', 1000, 30).send({from:account_addr}).then(function(result) {
-//         console.log(result);
-//     });
-// });
+viewAllIdeas('active');
 
 /////////////////////////////////////////
 // HTML Integration
 ////////////////////////////////////////
 
+function setFilter(filter, display) {
+
+	if(filter === currentFilter) return;
+
+	currentFilter = filter;
+
+	$('#chooseFilter').text(display);
+
+	viewAllIdeas(filter);
+}
+
+///////////////////////
+// Modal Sheets
+//////////////////////
+
 function createIdeaModal() {
 
+	//Clear form
+	$('#ownerName').val('');
+	$('#title').val('');
+	$('#desc').val('');
+	$('#fundingReq').val('');
+	$('#expiration').val('');
+	$('#projectLink').val('');
+	$('#imageLink').val('');
+
 	$('#createIdeaModal').modal('show');
+}
+
+function openFundModal(idea_id) {
+
+	document.getElementById('input' + idea_id.toString()).value = "";
+	$(`#Modal${idea_id}`).modal('show');
+}
+
+function validateIdeaForm() {
+
+	const docId = (id) => document.getElementById(id);
+
+	return (docId("ownerName").checkValidity() && docId("projectLink").checkValidity() && docId("imageLink").checkValidity()
+	&& docId("title").checkValidity() && docId("desc").checkValidity() && docId("fundingReq").checkValidity() && docId("expiration").checkValidity());
 }
 
 function submitIdea() {
@@ -480,20 +473,52 @@ function submitIdea() {
 	const imageLink = $('#imageLink').val();
 
 	//validate later
+	if (ownerName == '') {
+		alert('Please enter a valid owner name');
+		return;
+	}
+	//validate title
+	if (title == '') {
+		alert('Please enter a valid title');
+		return;
+	}
+	if(desc == '') {
+		alert('Please enter a valid description');
+		return;
+	}
+	if(fundingReq == '') {
+		alert('Please enter a valid funding request');
+		return;
+	}
+	if(expiration == '') {
+		alert('Please enter a valid expiration date');
+		return;
+	}
+	if(projectLink == '') {
+		alert('Please enter a valid project link');
+		return;
+	}
+	if(imageLink == '') {
+		alert('Please enter a valid image link');
+		return;
+	}
 
+	if(!validateIdeaForm()) {
+
+		alert("Form not valid");
+		return;
+	}
+	
 	//find number of days between today and expiration
 	var day2 = new Date(expiration);
 	var day1 = new Date();
-
+	
 	var difference = Math.abs(day2.getTime()-day1.getTime());
-
+	
 	difference = Math.ceil(difference/86400000);
-
-	console.log(difference);
-
-
+	
 	const total_link = imageLink + ','  + projectLink;
-
+	
 	var idea = {
 		'owner_name': ownerName,
 		'title': title,
@@ -502,23 +527,8 @@ function submitIdea() {
 		'days_to_deadline': difference,
 		'links': total_link
 	}
-
-	// console.log(expiration);
-
+	
 	createIdea(idea);
-}
-
-function unixToDate(unix_timestamp) {
-    // Create a new JavaScript Date object based on the timestamp
-    // multiplied by 1000 so that the argument is in milliseconds, not seconds.
-    var date = new Date(unix_timestamp * 1000);
-    return date.getUTCDate().toString() + '/' + date.getUTCMonth().toString()+1 + '/' + date.getFullYear().toString();
-}
-
-function openFundModal(idea_id) {
-
-	document.getElementById(idea_id.toString()).value = "";
-	$(`#Modal${idea_id}`).modal('show');
 }
 
 function createCard(idea) {
@@ -527,9 +537,12 @@ function createCard(idea) {
 	const currDate = Math.floor(Date.now()/1000);
 	const buttonStr = currDate >= parseInt(idea.time_of_deadline) ? '' 
 		: `
-		<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#Modal${idea.unique_id}">
+		<button type="button" class="btn btn-primary" onclick="openFundModal(${idea.unique_id})">
 			Fund this Project
 		</button>`;
+
+	const imageLink = idea.links.split(',')[0];
+	const projectLink = idea.links.split(',')[1];
 
     return `
     <div class="card card-idea m-3 shadow">
@@ -560,13 +573,13 @@ function createCard(idea) {
 
         <hr>
 
-        <h5>Funding Raised: ${idea.funding_raised} ETH</h4>
+        <h5>Funding Raised: ${web3.utils.fromWei(idea.funding_raised, 'ether')} ETH</h4>
 
         <div class="progress">
             <div class="progress-bar progress-bar-striped bg-success" role="progressbar" style="width: ${percentRaised}%" aria-valuenow="${percentRaised}" aria-valuemin="0" aria-valuemax="100"><span style="font-size: medium;font-weight: bolder;">${percentRaised}%</span></div>
         </div>
 
-        <div style="margin: auto;text-align: right;">Goal: <span>${idea.funding_req}</span> ETH</div>
+        <div style="margin: auto;text-align: right;">Goal: <span>${web3.utils.fromWei(idea.funding_req, 'ether')}</span> ETH</div>
 		<div>${buttonStr}</div>
         </div>
 
@@ -580,7 +593,10 @@ function createCard(idea) {
 				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 			</div>
 			<div class="modal-body">
-				<input min="0" type="number" value="" placeholder="Enter amount to fund:" id="${idea.unique_id}">
+				<div> Account: <span class="fundAddress">${account_addr}</span> </div>
+				<div> Total Balance: <span class="fundBalance">${account_bal}</span> </div>
+				<br>
+				<input min="0" type="number" value="" placeholder="Enter amount to fund:" id="input${idea.unique_id}">
 			</div>
 			<div class="modal-footer">
 				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -592,15 +608,46 @@ function createCard(idea) {
     `;
 }
 
-function buildFeed(ideas) {
+function buildFeed(ideas, filter) {
 
     const ideaContainer = document.getElementById('ideaContainer');
 	ideaContainer.innerHTML = '';
+	const currDate = Math.floor(Date.now()/1000);
 
-    ideas.forEach((idea) => {
+	const reveresedIdea = Array.from(ideas).reverse();
 
-        ideaContainer.innerHTML += createCard(idea);
-    });
+	switch(filter) {
+
+		case 'active': {
+
+			reveresedIdea.filter((idea) => currDate < parseInt(idea.time_of_deadline))
+			.forEach((idea) => {
+
+				ideaContainer.innerHTML += createCard(idea);
+			});
+			break;
+		}
+
+		case 'closed': {
+
+			reveresedIdea.filter((idea) => currDate >= parseInt(idea.time_of_deadline))
+			.forEach((idea) => {
+
+				ideaContainer.innerHTML += createCard(idea);
+			});
+			break;
+		}
+
+		case 'all': {
+
+			reveresedIdea.forEach((idea) => {
+
+				ideaContainer.innerHTML += createCard(idea);
+			});
+			break;
+		}
+	}
+    
 }
 
 ////////////////////////////////////////////
@@ -610,6 +657,10 @@ function buildFeed(ideas) {
 function copyAddress() {
 
 	navigator.clipboard.writeText(account_addr);
+
+	$('#userAddress').text('Copied Address!');
+
+	setTimeout(() => initialiseAddress(), 700);
 }
  
 function initialiseAddress() {
@@ -617,58 +668,82 @@ function initialiseAddress() {
 	web3.eth.getAccounts().then((accounts) => {
 
 		account_addr = accounts[0];
+
 		const len = account_addr.length;
 		const croppedAddress = account_addr.substring(0,6) + "..." + account_addr.substring(len-4, len);
 		document.getElementById('userAddress').innerHTML = croppedAddress;
+
+		Array.from(document.getElementsByClassName('fundAddress')).forEach((element) => {
+
+			element.innerHTML = account_addr;
+		});
+
+		web3.eth.getBalance(account_addr).then((balance) => {
+
+			account_bal = (Math.round(web3.utils.fromWei(balance) * 100) / 100);
+			document.getElementById('userBalance').innerHTML = account_bal.toString() + " ETH";
+
+			Array.from(document.getElementsByClassName('fundBalance')).forEach((element) => {
+
+				element.innerHTML = account_bal;
+			});
+		});
 	});
 }
 
-initialiseAddress();
-
 function createIdea(idea) {
+
+	$('#createIdeaModal').modal('hide');
+
+	//convert to wei when sending to smart contract
+	const weiAmount = web3.utils.toWei(idea.funding_req, 'ether');
     
-    web3.eth.getAccounts().then(function(accounts) {
-        console.log(accounts);
-        account_addr = accounts[0];
-        console.log(account_addr);
-        // $("#account").text(account_addr);
-    }).then(function() {
-        contract.methods.list_new_idea(idea.title, idea.desc, idea.owner_name, idea.links, idea.funding_req, idea.days_to_deadline).send({from:account_addr}).then(function(result) {
-            console.log(result);
-			viewAllIdeas();
-        });
-    });
+	contract.methods.list_new_idea(idea.title, idea.desc, idea.owner_name, idea.links, weiAmount, idea.days_to_deadline).send({from:account_addr}).then(function(result) {
+		console.log(result);
+		$('#successCreateIdeaModal').modal('show');
+		// initialiseAddress();
+		viewAllIdeas(currentFilter);
+	});
 }
 
-function viewAllIdeas() {
+function viewAllIdeas(filter) {
 
 	contract.methods.view_all_ideas().call().then(function(result) {
 		console.log(result);
-		buildFeed(result);
+		buildFeed(result, filter);
     });
 }
 
-// donateIdea(1, 500);
-
 function donateIdea(idea_id) {
 
-	const amount = parseInt(document.getElementById(idea_id.toString()).value);
+	let amount = (document.getElementById('input' + idea_id.toString())).value;
 
-	console.log(idea_id, amount);
+	if(!amount || parseFloat(amount) <= 0) {
+
+		alert("Enter valid amount");
+		return;
+	};
+
+	if(amount > account_bal) {
+
+		alert("Insufficient Balance");
+		return;
+	}
+	
+	//convert to wei before donating and storing in contract.
+	amount = web3.utils.toWei(amount, 'ether');
+
+	console.log(amount, typeof amount)
 
 	$(`#Modal${idea_id}`).modal('hide');
 
-	web3.eth.getAccounts().then(function(accounts) {
-        console.log(accounts);
-        account_addr = accounts[0];
-        console.log(amount, account_addr);
-		contract.methods.donate_to_idea(idea_id, amount).send({from:account_addr, value:amount})
-		.then(function(result) {
-			console.log(result);
-			$('#successModal').modal('show');
-			viewAllIdeas();
-		});
-    });
+	contract.methods.donate_to_idea(idea_id, amount).send({from:account_addr, value:amount})
+	.then(() => {
+
+		$('#successTransactionModal').modal('show');
+		viewAllIdeas(currentFilter);
+		// initialiseAddress();
+	});
 }
 
 function viewContBalance() {
@@ -686,6 +761,14 @@ function viewContBalance() {
             });
         });
     });
+}
+
+
+function unixToDate(unix_timestamp) {
+    // Create a new JavaScript Date object based on the timestamp
+    // multiplied by 1000 so that the argument is in milliseconds, not seconds.
+    var date = new Date(unix_timestamp * 1000);
+    return date.getUTCDate().toString() + '/' + date.getUTCMonth().toString()+1 + '/' + date.getFullYear().toString();
 }
 
 
