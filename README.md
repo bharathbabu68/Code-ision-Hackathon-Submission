@@ -9,7 +9,21 @@ A one-stop crypto crowdfunding platform that allows artists to list their ideas 
 3. Cryptocurrency Supported - All payments on our platform happen through cryptocurrency, and our smart contract functions as an escrow to hold the balance temporarily, until they can be withdrawn or refunded back based on the funding raised by the proposal. 
 4. Easy Filter on Campaigns - Easily view the campaigns that are currently active, and back a creator by funding their project, anything counts, so we don't have any minimum amount on our platform, you can fund as little as you want. 
 5. Enhanced Security - Our smart contract is highly secure, and uses multiple validations to ensure that no one misuses the platform. 
+6. Easy withdrawals and claim refunds - Once  campaign has been complete, it can be found on the past campaigns tab of our website, and if you are a campaign owner, you will be able to see a "withdraw funds", if your campaign was successful in raising funding. If a campaign failed, and you had funded the campaign, you will see a withdraw button which will directly reimburse your funds to your account in a single click. 
+
 
 ### Network
-As of now, our smart contract has been deployed on the Ropsten Test Network, at the following address '0x7a7037Bf6534E7D93d84E2eb2C1221b2528E430f', view our contract interactions at https://ropsten.etherscan.io/address/0x7a7037bf6534e7d93d84e2eb2c1221b2528e430f .
+As of now, our smart contract has been deployed on the Ropsten Test Network, at the following address '0x7a7037Bf6534E7D93d84E2eb2C1221b2528E430f', view our contract interactions at https://ropsten.etherscan.io/address/0x7a7037bf6534e7d93d84e2eb2c1221b2528e430f , can easily be migrated onto the mainnet in the future. 
 
+
+### Our Platform vs Other Centralized Platforms
+- You are in control of your idea, all your data exists on the blockchain, and is tamper proof, and ensures that the amount you have raised, can be withdrawn only by you. 
+- No one, including the developers of CrowdFund have the ability to access your funds present in the contract, and this ensures decentralization of control, giving you more power to create freely, and raise funds without any worries. 
+- Higher transparency, no fees. Our platform charges no fees, and you only have to pay for the network gas fees. 
+
+### Future Works
+- We plan to enable milestone based funding, where the funding amount is not unlocked all at once, but instead in the form of milestones that can be unlocked by the idea creator when goals are met, and using the decentralized community to decide on whether to proceed or not. 
+- This ensures higher security and also incentivizes the idea creator to have a solid plan in mind before deciding to list an idea on our platform. 
+- Tokenized approach, where people funding the project are given a token, which could appreciate in value, depending on the success of our project. 
+
+### Screenshots of our current Platform
