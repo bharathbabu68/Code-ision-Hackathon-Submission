@@ -32,12 +32,12 @@ As of now, our smart contract has been deployed on the Ropsten Test Network, at 
 #### One-stop Login using Metamask
 ![Login](https://github.com/bharathbabu68/Code-ision-Hackathon-Submission/blob/main/screenshots/connect_metamask.png)
 #### Metamask connection
-[!connection](https://github.com/bharathbabu68/Code-ision-Hackathon-Submission/blob/main/screenshots/metamask.png)
+![connection](https://github.com/bharathbabu68/Code-ision-Hackathon-Submission/blob/main/screenshots/metamask.png)
 #### Home Page
-[!home](https://github.com/bharathbabu68/Code-ision-Hackathon-Submission/blob/main/screenshots/home.png)
+![home](https://github.com/bharathbabu68/Code-ision-Hackathon-Submission/blob/main/screenshots/home.png)
 #### Fund a campaign
-[!fund](https://github.com/bharathbabu68/Code-ision-Hackathon-Submission/blob/main/screenshots/fund_project.png)
+![fund](https://github.com/bharathbabu68/Code-ision-Hackathon-Submission/blob/main/screenshots/fund_project.png)
 #### Create a new campaign
-[!create](https://github.com/bharathbabu68/Code-ision-Hackathon-Submission/blob/main/screenshots/create_new_idea.png)
+![create](https://github.com/bharathbabu68/Code-ision-Hackathon-Submission/blob/main/screenshots/create_new_idea.png)
 #### Past Campaigns
-[!past](https://github.com/bharathbabu68/Code-ision-Hackathon-Submission/blob/main/screenshots/past_campaigns.png)
+![past](https://github.com/bharathbabu68/Code-ision-Hackathon-Submission/blob/main/screenshots/past_campaigns.png)
