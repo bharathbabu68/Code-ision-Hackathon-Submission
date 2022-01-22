@@ -72,17 +72,18 @@
 
           <div class="row">
 
-            <h1 class="col" style="color: rgb(50, 60, 61);font-weight: bolder;">Ideas</h1>
-
+            <h1 class="col" style="color: rgb(50, 60, 61);font-weight: bolder; font-size: 35px;">Check out our campaigns!</h1>
+            
+            <div></div>
             <div class="dropdown col">
               <a class="btn btn-secondary dropdown-toggle" href="#" id="chooseFilter" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
-                Active
+                Active Campaigns
               </a>
             
               <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-                <li><a class="dropdown-item" onclick="setFilter('active', 'Active')">Active</a></li>
-                <li><a class="dropdown-item " onclick="setFilter('closed', 'Closed')">Closed</a></li>
-                <li><a class="dropdown-item" onclick="setFilter('all', 'All')">All</a></li>
+                <li><a class="dropdown-item" onclick="setFilter('active', 'Active Campaigns')">Active</a></li>
+                <li><a class="dropdown-item " onclick="setFilter('closed', 'Past Campaigns')">Past</a></li>
+                <li><a class="dropdown-item" onclick="setFilter('all', 'All campaigns')">All</a></li>
               </ul>
             </div>
 
@@ -116,11 +117,46 @@
         <div class="modal-dialog">
           <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title" id="successTransactionModalLabel">Hoorayy!!</h5>
+            <h5 class="modal-title" id="successTransactionModalLabel">Success</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            Transaction Successfull!
+            You have successfully funded the campaign.
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          </div>
+          </div>
+        </div>
+      </div>
+
+
+      <div class="modal fade" id="successRefundModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="successRefundModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="successRefundModalLabel">Success</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            You have been successfully refunded. 
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal fade" id="successwithdrawModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="successwithdrawModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="successwithdrawModalLabel">Success</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            Congrats for meeting your goal. You have successfully withdrawn your funding amount.  
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -181,7 +217,7 @@
                 <div class="row" style="margin-bottom: 70px;">
   
                   <label class="col" for="fundingReq">Funding Required (in ETH):</label>
-                  <input class="col" id="fundingReq" type="number" min="1" placeholder="Funding">
+                  <input class="col" id="fundingReq" type="number" min="0" step="0.01" placeholder="Funding">
   
                 </div>
 

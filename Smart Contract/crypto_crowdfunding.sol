@@ -32,16 +32,13 @@ contract CrowdFunding{
 
     mapping(uint256 => donor[]) public project_donators;
 
-    //trying a 2d mapping
-    mapping(uint256 => mapping(address => uint256)) public checking;
-
     idea[] public ideas;
 
     function list_new_idea(string memory title, string memory desc, string memory owner_name, string memory links, uint256 funding_req, uint days_to_deadline) public returns(uint256){
         require(days_to_deadline > 0);
         require(funding_req > 0);
         
-        ideas.push(idea(true, title, desc,owner_name, links,id_counter,funding_req, block.timestamp, 0, uint256(block.timestamp + days_to_deadline *1 minutes),0, msg.sender));
+        ideas.push(idea(true, title, desc,owner_name, links,id_counter,funding_req, block.timestamp, 0, uint256(block.timestamp + days_to_deadline *1 days),0, msg.sender));
         id_counter++;
         emit listed_idea(id_counter-1);
         return id_counter-1;
@@ -58,9 +55,6 @@ contract CrowdFunding{
         require(msg.value > 0 && msg.value==amount);
         // enable a person to donate to an already existing idea
         uint256 amt = msg.value;
-        //checking 2d mapping
-        checking[idea_id][msg.sender] += amt;
-
         all_time_raised+=amt;
         ideas[idea_id].funding_raised+=amt;
         donor[] storage mydonor = project_donators[idea_id];
@@ -95,7 +89,8 @@ contract CrowdFunding{
         donor[] storage mydonor = project_donators[idea_id];
         for(uint i=0;i<mydonor.length;i++){
             if(mydonor[i].donator == msg.sender){
-                donated_amt += mydonor[i].amount_donated;
+                if(mydonor[i].is_refunded==false)
+                    donated_amt += mydonor[i].amount_donated;
                 break;
             }
         }
@@ -115,7 +110,7 @@ contract CrowdFunding{
         // withdrawing when we raised funding
         require(ideas[idea_id].is_active==true);
         require(ideas[idea_id].idea_owner == msg.sender);
-        require(block.timestamp >= ideas[idea_id].time_of_deadline);
+        require(block.timestamp > ideas[idea_id].time_of_deadline);
         require(ideas[idea_id].funding_raised >= ideas[idea_id].funding_req);
         uint amt = ideas[idea_id].funding_raised;
         payable(msg.sender).transfer(amt);

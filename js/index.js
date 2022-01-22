@@ -16,30 +16,6 @@ const abi = [
 		"inputs": [
 			{
 				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			},
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"name": "checking",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
 				"name": "idea_id",
 				"type": "uint256"
 			}
@@ -395,7 +371,9 @@ const abi = [
 		"type": "function"
 	}
 ];
-var address = "0x34cc708ba94a76F207A2B5B9950dFd693C6C4864";
+var address = "0x7a7037Bf6534E7D93d84E2eb2C1221b2528E430f";
+var donated_result;
+var croppedaddressval;
 
 var web3;
 var account_addr, account_bal, currentFilter = "active";
@@ -411,6 +389,7 @@ var contract = new web3.eth.Contract(abi, address);
 if(window.ethereum) {
 	window.ethereum.on('accountsChanged', () => {
 		initialiseAddress();
+		viewAllIdeas(currentFilter);
 	});
 }
 
@@ -462,7 +441,7 @@ function validateIdeaForm() {
 	const docId = (id) => document.getElementById(id);
 
 	return (docId("ownerName").checkValidity() && docId("projectLink").checkValidity() && docId("imageLink").checkValidity()
-	&& docId("title").checkValidity() && docId("desc").checkValidity() && docId("fundingReq").checkValidity() && docId("expiration").checkValidity());
+	&& docId("title").checkValidity() && docId("desc").checkValidity() && docId("expiration").checkValidity());
 }
 
 function submitIdea() {
@@ -489,7 +468,7 @@ function submitIdea() {
 		alert('Please enter a valid description');
 		return;
 	}
-	if(fundingReq == '') {
+	if(fundingReq == '' || parseFloat(fundingReq) <= 0) {
 		alert('Please enter a valid funding request');
 		return;
 	}
@@ -534,7 +513,10 @@ function submitIdea() {
 	createIdea(idea);
 }
 
-function createCard(idea) {
+
+function createCard(idea, donated_result) {
+
+
 
     const percentRaised = Math.round(idea.funding_raised / idea.funding_req * 100,2);
 	const currDate = Math.floor(Date.now()/1000);
@@ -543,6 +525,24 @@ function createCard(idea) {
 		<button type="button" class="btn btn-primary" onclick="openFundModal(${idea.unique_id})">
 			Fund this Project
 		</button>`;
+
+	const showFundedStatus = (currDate >= parseInt(idea.time_of_deadline) && web3.utils.fromWei(idea.funding_raised, 'ether') >= web3.utils.fromWei(idea.funding_req, 'ether')) ? `
+		<div style="color: green;font-size: large"> This idea has been successfully funded. </div>` : '';
+
+	const showNotFundedStatus = (currDate >= parseInt(idea.time_of_deadline) && web3.utils.fromWei(idea.funding_raised, 'ether') < web3.utils.fromWei(idea.funding_req, 'ether')) ? `
+		<div style="color: red;font-size: large"> This idea was not able to raise enough funds. Refunds are being processed. </div>` : '';
+	
+	const fundingReached = (currDate >= parseInt(idea.time_of_deadline) && web3.utils.fromWei(idea.funding_raised, 'ether') >= web3.utils.fromWei(idea.funding_req, 'ether') && idea.idea_owner === account_addr && idea.is_active==true) ? `
+		<button class="btn btn-primary" onclick="withdrawFundingAmount(${idea.unique_id})">Withdraw Funding</button>` : '';
+	
+	
+	const fundingNotReached = (currDate >= parseInt(idea.time_of_deadline) && web3.utils.fromWei(idea.funding_raised, 'ether') < web3.utils.fromWei(idea.funding_req, 'ether') && donated_result) ? `
+	 	<button class="btn btn-primary" onclick="claimRefundAmount(${idea.unique_id})">Claim Refund</button>` : '';
+
+	var idea_owner = idea.idea_owner;
+	var len = idea_owner.length;
+	croppedaddressval = idea_owner.substring(0,6) + "..." + idea_owner.substring(len-4, len);
+
 
 	const imageLink = idea.links.split(',')[0];
 	const projectLink = idea.links.split(',')[1];
@@ -559,7 +559,7 @@ function createCard(idea) {
         <div style="height: 50px; width: 100%;">${idea.desc}</div>
 
         <div>
-            <h5>Project Owner: <span>${idea.owner_name}</span></h5>
+            <h5>Project Owner: <span>${idea.owner_name} (${croppedaddressval})</span></h5>
         </div>
 
         <div class="row">
@@ -584,6 +584,10 @@ function createCard(idea) {
 
         <div style="margin: auto;text-align: right;">Goal: <span>${web3.utils.fromWei(idea.funding_req, 'ether')}</span> ETH</div>
 		<div>${buttonStr}</div>
+		<div>${showFundedStatus}</div>
+		<div>${showNotFundedStatus}</div>
+		<div>${fundingReached}</div>
+		<div>${fundingNotReached}</div>
         </div>
 
     </div>
@@ -599,7 +603,8 @@ function createCard(idea) {
 				<div> Account: <span class="fundAddress">${account_addr}</span> </div>
 				<div> Total Balance: <span class="fundBalance">${account_bal}</span> </div>
 				<br>
-				<input min="0" type="number" value="" placeholder="Enter amount to fund:" id="input${idea.unique_id}">
+				<input min="0" type="number" value="" placeholder="Enter amount to fund" id="input${idea.unique_id}">
+				  ETH
 			</div>
 			<div class="modal-footer">
 				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -610,6 +615,17 @@ function createCard(idea) {
 	</div>
     `;
 }
+
+function didFundtheProject(unique_id) {
+	contract.methods.donated_amount_to_project(unique_id).call({from: account_addr}).then(function(result) {
+		var res = web3.utils.fromWei(result, 'ether');
+		if(res > 0) 
+			return true;
+		else
+		return false;
+	});
+}
+
 
 function buildFeed(ideas, filter) {
 
@@ -626,7 +642,17 @@ function buildFeed(ideas, filter) {
 			reveresedIdea.filter((idea) => currDate < parseInt(idea.time_of_deadline))
 			.forEach((idea) => {
 
-				ideaContainer.innerHTML += createCard(idea);
+
+			contract.methods.donated_amount_to_project(idea.unique_id).call({from: account_addr}).then(function(result) {
+					var res = web3.utils.fromWei(result, 'ether');
+					console.log(res);
+					if(res > 0) 
+						donated_result =  true;
+					else
+						donated_result =  false;
+					ideaContainer.innerHTML += createCard(idea, donated_result);
+			})
+
 			});
 			break;
 		}
@@ -636,7 +662,15 @@ function buildFeed(ideas, filter) {
 			reveresedIdea.filter((idea) => currDate >= parseInt(idea.time_of_deadline))
 			.forEach((idea) => {
 
-				ideaContainer.innerHTML += createCard(idea);
+				contract.methods.donated_amount_to_project(idea.unique_id).call({from: account_addr}).then(function(result) {
+					var res = web3.utils.fromWei(result, 'ether');
+					console.log(res);
+					if(res > 0) 
+						donated_result =  true;
+					else
+						donated_result =  false;
+					ideaContainer.innerHTML += createCard(idea, donated_result);
+			})
 			});
 			break;
 		}
@@ -645,7 +679,15 @@ function buildFeed(ideas, filter) {
 
 			reveresedIdea.forEach((idea) => {
 
-				ideaContainer.innerHTML += createCard(idea);
+				contract.methods.donated_amount_to_project(idea.unique_id).call({from: account_addr}).then(function(result) {
+					var res = web3.utils.fromWei(result, 'ether');
+					console.log(res);
+					if(res > 0) 
+						donated_result =  true;
+					else
+						donated_result =  false;
+					ideaContainer.innerHTML += createCard(idea, donated_result);
+			})
 			});
 			break;
 		}
@@ -659,11 +701,13 @@ function copyAddress() {
 		connect();
 	}
 
-	navigator.clipboard.writeText(account_addr);
+	else{
+		navigator.clipboard.writeText(account_addr);
 
-	$('#userAddress').text('Copied Address!');
+		$('#userAddress').text('Copied Address!');
 
-	setTimeout(() => initialiseAddress(), 700);
+		setTimeout(() => initialiseAddress(), 700);
+	}
 }
  
 function initialiseAddress() {
@@ -681,6 +725,7 @@ function initialiseAddress() {
 
 		const len = account_addr.length;
 		const croppedAddress = account_addr.substring(0,6) + "..." + account_addr.substring(len-4, len);
+		croppedaddressval = croppedAddress;
 		document.getElementById('userAddress').innerHTML = croppedAddress;
 
 		Array.from(document.getElementsByClassName('fundAddress')).forEach((element) => {
@@ -711,10 +756,30 @@ function createIdea(idea) {
 	contract.methods.list_new_idea(idea.title, idea.desc, idea.owner_name, idea.links, weiAmount, idea.days_to_deadline).send({from:account_addr}).then(function(result) {
 		console.log(result);
 		$('#successCreateIdeaModal').modal('show');
-		// initialiseAddress();
+		initialiseAddress();
 		viewAllIdeas(currentFilter);
 	});
 }
+
+function withdrawFundingAmount(unique_id){
+	contract.methods.withdraw_funding_raised(unique_id).send({from: account_addr})
+	.then(function(result){
+		console.log(result);
+		$('#successwithdrawModal').modal('show');
+		initialiseAddress();
+		viewAllIdeas(currentFilter);
+	});
+}
+
+function claimRefundAmount(unique_id){
+	contract.methods.claim_refund(unique_id).send({from: account_addr}).then(function(result){
+		console.log(result);
+		$('#successRefundModal').modal('show');
+		initialiseAddress();
+		viewAllIdeas(currentFilter);
+	});
+}
+
 
 function viewAllIdeas(filter) {
 
@@ -743,16 +808,15 @@ function donateIdea(idea_id) {
 	//convert to wei before donating and storing in contract.
 	amount = web3.utils.toWei(amount, 'ether');
 
-	console.log(amount, typeof amount)
 
 	$(`#Modal${idea_id}`).modal('hide');
 
 	contract.methods.donate_to_idea(idea_id, amount).send({from:account_addr, value:amount})
-	.then(() => {
-
+	.then((result) => {
+		console.log(result);
 		$('#successTransactionModal').modal('show');
 		viewAllIdeas(currentFilter);
-		// initialiseAddress();
+		initialiseAddress();
 	});
 }
 
