@@ -514,9 +514,12 @@ function submitIdea() {
 }
 
 
-function createCard(idea, donated_result) {
+function createCard(idea, amt_donated) {
 
-
+	if(amt_donated>0)
+		donated_result=true;
+	else
+		donated_result=false;
 
     const percentRaised = Math.round(idea.funding_raised / idea.funding_req * 100,2);
 	const currDate = Math.floor(Date.now()/1000);
@@ -526,18 +529,18 @@ function createCard(idea, donated_result) {
 			Fund this Project
 		</button>`;
 
-	const showFundedStatus = (currDate >= parseInt(idea.time_of_deadline) && web3.utils.fromWei(idea.funding_raised, 'ether') >= web3.utils.fromWei(idea.funding_req, 'ether')) ? `
+	const showFundedStatus = (currDate >= parseInt(idea.time_of_deadline) && parseFloat(web3.utils.fromWei(idea.funding_raised, 'ether')) >= parseFloat(web3.utils.fromWei(idea.funding_req, 'ether'))) ? `
 		<div style="color: green;font-size: large"> This idea has been successfully funded. </div>` : '';
 
-	const showNotFundedStatus = (currDate >= parseInt(idea.time_of_deadline) && web3.utils.fromWei(idea.funding_raised, 'ether') < web3.utils.fromWei(idea.funding_req, 'ether')) ? `
-		<div style="color: red;font-size: large"> This idea was not able to raise enough funds. Refunds are being processed. </div>` : '';
+	const showNotFundedStatus = (currDate >= parseInt(idea.time_of_deadline) && parseFloat(web3.utils.fromWei(idea.funding_raised, 'ether')) < parseFloat(web3.utils.fromWei(idea.funding_req, 'ether'))) ? `
+		<div style="color: red;font-size: medium"> This idea was not able to raise enough funds. Refunds are being processed. </div>` : '';
 	
-	const fundingReached = (currDate >= parseInt(idea.time_of_deadline) && web3.utils.fromWei(idea.funding_raised, 'ether') >= web3.utils.fromWei(idea.funding_req, 'ether') && idea.idea_owner === account_addr && idea.is_active==true) ? `
+	const fundingReached = (currDate >= parseInt(idea.time_of_deadline) && parseFloat(web3.utils.fromWei(idea.funding_raised, 'ether')) >= parseFloat(web3.utils.fromWei(idea.funding_req, 'ether')) && idea.idea_owner === account_addr && idea.is_active==true) ? `
 		<button class="btn btn-primary" onclick="withdrawFundingAmount(${idea.unique_id})">Withdraw Funding</button>` : '';
 	
 	
-	const fundingNotReached = (currDate >= parseInt(idea.time_of_deadline) && web3.utils.fromWei(idea.funding_raised, 'ether') < web3.utils.fromWei(idea.funding_req, 'ether') && donated_result) ? `
-	 	<button class="btn btn-primary" onclick="claimRefundAmount(${idea.unique_id})">Claim Refund</button>` : '';
+	const fundingNotReached = (currDate >= parseInt(idea.time_of_deadline) && parseFloat(web3.utils.fromWei(idea.funding_raised, 'ether')) < parseFloat(web3.utils.fromWei(idea.funding_req, 'ether')) && donated_result) ? `
+	 	<div style="margin-top:5px;"> You donated ${amt_donated} ETH to this project.  <button class="btn btn-primary btn-sm" onclick="claimRefundAmount(${idea.unique_id})">Claim Refund</button> </div>` : '';
 
 	var idea_owner = idea.idea_owner;
 	var len = idea_owner.length;
@@ -645,12 +648,12 @@ function buildFeed(ideas, filter) {
 
 			contract.methods.donated_amount_to_project(idea.unique_id).call({from: account_addr}).then(function(result) {
 					var res = web3.utils.fromWei(result, 'ether');
-					console.log(res);
+					// console.log(res);
 					if(res > 0) 
 						donated_result =  true;
 					else
 						donated_result =  false;
-					ideaContainer.innerHTML += createCard(idea, donated_result);
+					ideaContainer.innerHTML += createCard(idea, res);
 			})
 
 			});
@@ -669,7 +672,7 @@ function buildFeed(ideas, filter) {
 						donated_result =  true;
 					else
 						donated_result =  false;
-					ideaContainer.innerHTML += createCard(idea, donated_result);
+					ideaContainer.innerHTML += createCard(idea, res);
 			})
 			});
 			break;
@@ -686,7 +689,7 @@ function buildFeed(ideas, filter) {
 						donated_result =  true;
 					else
 						donated_result =  false;
-					ideaContainer.innerHTML += createCard(idea, donated_result);
+					ideaContainer.innerHTML += createCard(idea, res);
 			})
 			});
 			break;
